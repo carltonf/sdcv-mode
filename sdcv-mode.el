@@ -86,7 +86,9 @@ The result will be displayed in buffer named with
     (insert (sdcv-do-lookup word)))
   (sdcv-goto-sdcv)
   (sdcv-mode)
-  (sdcv-mode-reinit))
+  (sdcv-mode-reinit)
+  ;; always display the first found entry
+  (sdcv-mode-next-line))
 
 (defun sdcv-list-dictionary ()
   "Show available dictionaries."
@@ -103,9 +105,11 @@ and `sdcv-dictionary-path'."
      (list "--data-dir" sdcv-dictionary-path))
    (if (null sdcv-dictionary-list)
        '()
-     (mapcan (lambda (dict)
-               (list "-u" dict))
-             sdcv-dictionary-list))))
+     (let (result-dictionary-list)
+       (dolist (dict sdcv-dictionary-list)
+         (add-to-list 'result-dictionary-list "-u")
+         (add-to-list 'result-dictionary-list dict))
+       (nreverse result-dictionary-list)))))
 
 ;;; ==================================================================
 ;;; utilities to switch from and to sdcv buffer
@@ -250,7 +254,7 @@ the beginning of the buffer."
     (setq buffer-read-only t)
     (hide-body)
     (goto-char (point-min))
-    (next-line 1)
+    (forward-line 1)
     (show-entry)))
 
 (defun sdcv-mode-scroll-up-one-line ()
@@ -262,7 +266,7 @@ the beginning of the buffer."
 (defun sdcv-mode-next-line ()
   (interactive)
   (ignore-errors
-    (next-line 1)
+    (forward-line 1)
     (save-excursion
       (beginning-of-line nil)
       (when (looking-at outline-regexp)
