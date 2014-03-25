@@ -87,6 +87,11 @@ The result will be displayed in buffer named with
   (sdcv-goto-sdcv)
   (sdcv-mode)
   (sdcv-mode-reinit)
+  ;; TODO this should be enabled by some variable value
+  ;; enable follow mode for column reading only in dedicated lookup frame!
+  (when (eq (selected-frame) sdcv-lookup-frame)
+    (follow-delete-other-windows-and-split)
+    (follow-mode 1))
   ;; always display the first found entry
   (sdcv-mode-next-line))
 
@@ -147,21 +152,17 @@ and `sdcv-dictionary-path'."
 (defun sdcv-return-from-sdcv ()
   "Bury sdcv buffer and restore the previous window configuration."
   (interactive)
-  (if (window-configuration-p sdcv-previous-window-conf)
-      (progn
-        (set-window-configuration sdcv-previous-window-conf)
-        (setq sdcv-previous-window-conf nil)
-        (bury-buffer (sdcv-get-buffer)))
-    (bury-buffer))
-  (if (not (null sdcv-started-externally-from))
-      (progn
-        (start-process "switch-to-last-window"
-                       nil
-                       "/usr/bin/wmctrl"
-                       "-i" "-a"
-                       (format "%s" sdcv-started-externally-from))
-        (message "switching back to window %s" sdcv-started-externally-from)
-        (setq sdcv-started-externally-from nil))))
+  (if (eq (selected-frame)
+          sdcv-lookup-frame)
+      (if (y-or-n-p "Hide sdcv lookup frame? ")
+          ;; only hide frame, no restore of window configuration of the frame.
+          (make-frame-invisible))
+    (if (window-configuration-p sdcv-previous-window-conf)
+        (progn
+          (set-window-configuration sdcv-previous-window-conf)
+          (setq sdcv-previous-window-conf nil)
+          (bury-buffer (sdcv-get-buffer)))
+      (bury-buffer))))
 
 (defun sdcv-get-buffer ()
   "Get the sdcv buffer. Create one if there's none."
