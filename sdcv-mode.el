@@ -149,14 +149,20 @@ and `sdcv-dictionary-path'."
 (defvar sdcv-started-externally-from nil
   "The window id from which sdcv is started externally")
 
+(defvar sdcv-frame-hide-confirmation nil
+  "Whether hiding sdcv frame requires confirmation, t yes, nil
+  means no.")
+
 (defun sdcv-return-from-sdcv ()
   "Bury sdcv buffer and restore the previous window configuration."
   (interactive)
   (if (eq (selected-frame)
           sdcv-lookup-frame)
-      (if (y-or-n-p "Hide sdcv lookup frame? ")
-          ;; only hide frame, no restore of window configuration of the frame.
-          (make-frame-invisible))
+      ;; only hide frame, no restore of window configuration of the frame.
+      (if (and sdcv-frame-hide-confirmation
+               (not (y-or-n-p "Hide sdcv lookup frame? ")))
+          ()                            ;only case no hiding
+        (make-frame-invisible))
     (if (window-configuration-p sdcv-previous-window-conf)
         (progn
           (set-window-configuration sdcv-previous-window-conf)
