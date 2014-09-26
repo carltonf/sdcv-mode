@@ -9,4 +9,4 @@ all: $(ELCFILES)
 	@emacs -batch -q -no-site-file -f batch-byte-compile $<
 
 clean:
-	@rm -f *.elc
+	@rm -fv *.elc
