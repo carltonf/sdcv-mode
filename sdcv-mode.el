@@ -81,6 +81,7 @@ Word may contain some special characters:
 The result will be displayed in buffer named with
 `sdcv-buffer-name' with `sdcv-mode'."
   (with-current-buffer (get-buffer-create sdcv-buffer-name)
+    (cd "~/")
     (setq buffer-read-only nil)
     (erase-buffer)
     (insert (sdcv-do-lookup word)))
@@ -346,12 +347,15 @@ characters are stripped.")
     (when (null process)
       (with-current-buffer (get-buffer-create
 			    sdcv-process-buffer-name)
+        (cd "~/")
 	(erase-buffer)
 	(setq process (apply 'start-process
 			     sdcv-process-name
 			     sdcv-process-buffer-name
 			     sdcv-program-path
 			     (sdcv-generate-dictionary-argument)))
+        ;; ok to kill without confirmation
+        (set-process-query-on-exit-flag process nil)
 	;; kill the initial prompt
 	(let ((i 0))
 	  (message "starting sdcv...")
